@@ -18,9 +18,12 @@ module.exports = class Feed extends Sequelize.Model{
                 allowNull: false,
             },
             imgUri: {
-                type: Sequelize.STRING(45),
+                type: Sequelize.STRING(100),
                 allowNull: false,
             },
+            like: {
+                type: Sequelize.INTEGER,
+            }
         }, {
             sequelize,
             timestamps: true,
@@ -38,5 +41,6 @@ module.exports = class Feed extends Sequelize.Model{
             through: 'like',
         });
         db.Feed.belongsTo(db.Book);
+        db.Feed.belongsTo(db.User);
     }
 };

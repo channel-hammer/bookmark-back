@@ -41,6 +41,7 @@ module.exports = class User extends Sequelize.Model{
         db.User.belongsToMany(db.Feed, {
             through: 'like',
         });
+        db.User.hasMany(db.Feed);
         db.User.belongsToMany(db.Book, {
             through: 'book_read',
         });

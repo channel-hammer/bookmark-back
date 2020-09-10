@@ -61,6 +61,32 @@ router.get('/board/categories/user/:user_id', verifyToken, async (req, res) => {
     }
 });
 
+router.post('/board/feeds/like', verifyToken, async (req, res) => {
+  const { user_id, feed_id } = req.body;
+  try {
+    const user = User.findOne({
+      where: { id: user_id },
+      include: {
+        model: Feed,
+        where: { id: feed_id },
+      },
+    });
+    if(!user){
+      return res.status(416).json({
+        status: 416,
+        message: '아이디 오류',
+      });
+    }
+    
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      status: 500,
+      message: '서버 에러',
+    });
+  } 
+});
+
 router.get('/board/feeds/:feed_id', verifyToken, async (req, res) => {//피드 정보 가져오기
   const id = Number(req.params.feed_id);
     try{
@@ -74,7 +100,7 @@ router.get('/board/feeds/:feed_id', verifyToken, async (req, res) => {//피드 �
           message: "null table"
         });
       } 
-
+      
       console.log(feed);
       return res.json({
         code: 200,
@@ -92,26 +118,26 @@ router.get('/board/feeds/:feed_id', verifyToken, async (req, res) => {//피드 �
     }
 });
 
-router.get('/board/feeds/user/:user_id',  verifyToken, async (req, res) => {//피드 정보 가져오기
-  const id = Number(req.params.user_id);
+router.get('/board/feeds/user/:user_id',  verifyToken, async (req, res) => {//유저 아이디로 피드 정보 가져오기
+  const UserId = Number(req.params.user_id);
     try{
-      const user = await User.findOne( {
-        where: { id },
+      const feeds = await Feed.findAll({
+        where: { UserId },
+        include: Book,
       });
 
-      if(!user){
+      if(!feeds){
         return res.json({
           code: 204,
           message: "Unregistered user"
         });
       } 
-      console.log(user);
-      feeds = await user.getFeeds();
       console.log(feeds);
+    
       return res.json({
         code: 200,
         payload: JSON.stringify(feeds),
-        message: `user_id:${id} feeds`
+        message: `user_id:${UserId} feeds`
       });
       
       
@@ -130,37 +156,44 @@ router.post('/board/feeds', async (req, res) => {//피드 등록
     const user = await User.findOne({
       where: { id: user_id },
     });
-
+    
     if(!user){
       return res.status(401).json({
         code: 401,
         message: '등록되지 않은 유저입니다.'
       });
     }
-    
     const feed = await Feed.create({
       author: feed_author,
       contents: feed_contents,
       imgUri: feed_imgUri,
+      UserId: user_id
     });
-    const book = await Book.create({
-      author: book_author,
-      name: book_name,
-      isbn: book_isbn,
-      price: 1,
-      publisher: book_publisher,
-      update: "temp",
+    let book = await Book.findOne({
+      where: { isbn: book_isbn },
     });
+    if(!book){
+      book = await Book.create({
+        author: book_author,
+        name: book_name,
+        isbn: book_isbn,
+        price: 1,
+        publisher: book_publisher,
+        update: "temp",
+      });
+    }
+    
     await user.addBook(book);
-    await user.addFeed(feed);
     await book.addFeed(feed);
     return res.status(200).json({
       code: 200,
+      payload: JSON.stringify(feed),
       message: '피드가 등록되었습니다.'
     });
 
 
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       code: 500,
       message: '서버 에러',
