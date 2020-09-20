@@ -9,6 +9,7 @@ const dotenv = require('dotenv');
 const helmet = require('helmet');
 const hpp = require('hpp');
 const RedisStore = require('connect-redis')(session);
+const redis = require('redis');
 
 dotenv.config();
 const logger = require('./logger');
@@ -44,6 +45,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
+
+const client = redis.createClient({
+  no_ready_check: true,
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  pass: process.env.REDIS_PASSWORD,
+  logErrors: true,
+});
 const sessionOptions = {
   resave: false,
   saveUninitialized: false,
@@ -53,9 +62,7 @@ const sessionOptions = {
     secure: false,
   },
   store: new RedisStore({
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    pass: process.env.REDIS_PASSWORD
+    client
   }),
 }
 if (process.env.NODE_ENV === 'production'){
