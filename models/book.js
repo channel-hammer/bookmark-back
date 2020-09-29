@@ -37,13 +37,17 @@ module.exports = class Book extends Sequelize.Model{
                 type: Sequelize.STRING(45),
                 allowNull: false,
             },
+            imageLink: {
+                type: Sequelize.STRING(200),
+                allowNull: true,
+            }
         }, {
             sequelize,
-            timestamps: false,
+            timestamps: true,
             underscored: false,
             modelName: 'Book',
             tableName: 'books',
-            paranoid: false,
+            paranoid: true,
             charset: 'utf8',
             collate: 'utf8_general_ci',
         });

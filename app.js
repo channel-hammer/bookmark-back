@@ -10,6 +10,7 @@ const helmet = require('helmet');
 const hpp = require('hpp');
 const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
+const fs = require('fs');
 
 dotenv.config();
 const logger = require('./logger');
@@ -23,7 +24,7 @@ app.set('port', process.env.PORT || 8002);
 app.set('view engine', 'html');
 nunjucks.configure('views', {
   express: app,
-  watch: true,
+  watch: true, 
 });
 sequelize.sync({ force: false })
   .then(() => {
@@ -53,6 +54,7 @@ const client = redis.createClient({
   pass: process.env.REDIS_PASSWORD,
   logErrors: true,
 });
+
 const sessionOptions = {
   resave: false,
   saveUninitialized: false,

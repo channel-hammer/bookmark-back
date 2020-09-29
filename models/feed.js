@@ -23,6 +23,8 @@ module.exports = class Feed extends Sequelize.Model{
             },
             like: {
                 type: Sequelize.INTEGER,
+                allowNull: false,
+                
             }
         }, {
             sequelize,
