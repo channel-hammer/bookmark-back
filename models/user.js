@@ -45,8 +45,13 @@ module.exports = class User extends Sequelize.Model{
         db.User.belongsToMany(db.Book, {
             through: 'book_read',
         });
+        db.User.belongsToMany(db.Book, {
+            through: 'wish'
+        })
+
         db.User.belongsToMany(db.Category, {
             through: 'user_category',
         });
+
     }
 };

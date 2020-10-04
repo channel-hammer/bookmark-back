@@ -10,7 +10,6 @@ const router = express.Router();
 router.use('/board', board);
 router.use('/user', user);
 
-
 module.exports = router;
 
 // categories table init method implemented once when the server starts for the first time

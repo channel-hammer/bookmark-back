@@ -14,10 +14,11 @@ const router = express.Router();
 
 //get client from redis labs 
 const redisClient = redis.createClient({
+  
   no_ready_check: true,
   host: process.env.REDIS_HOST,
   port: process.env.REDIS_PORT,
-  pass: process.env.REDIS_PASSWORD,
+  password: process.env.REDIS_PASSWORD,
   logErrors: true,
 });
 
@@ -33,8 +34,8 @@ router.post('/account/profile', verifyToken, upload.single('img'), async (req, r
   try {
     await User.update(
       { profileUri: req.file.location, },
-      { where: { id: user_id }
-    }); 
+      { where: { id: user_id } }
+      ); 
 
     console.log(req.file.location);
     return res.status(201).json({
@@ -99,7 +100,7 @@ router.post('/account/auth', async (req, res) => {
     const { user_email, user_pw } = req.body;
 
     //Try fetching the result from Redis first in case we have it cached
-    return redisClient.get(user_email, (error, result) => {
+    return redisClient.get(user_email, async (error, result) => {
       if(error) {
         throw error;
       }
@@ -112,10 +113,10 @@ router.post('/account/auth', async (req, res) => {
           expiresIn: '30m', // 30분
           issuer: 'bookmark-api',
         });
-
+        result.pw = "";
         return res.json({
           code: 200,
-          payload: JSON.stringify(result),
+          payload: result,
           message: '토큰이 발급되었습니다',
           token,
         });
@@ -143,10 +144,12 @@ router.post('/account/auth', async (req, res) => {
             expiresIn: '30m', // 30분
             issuer: 'bookmark-api',
           });
-          console.log(token)
+          const payload = JSON.stringify(user);
+          payload.pw = "";
+          console.log(token);
           return res.json({
             code: 200,
-            payload: JSON.stringify(user),
+            payload,
             message: '토큰이 발급되었습니다',
             token,
           });

@@ -35,6 +35,7 @@ module.exports = class Book extends Sequelize.Model{
             },
             isbn: {
                 type: Sequelize.STRING(45),
+                primaryKey: true,
                 allowNull: false,
             },
             imageLink: {
@@ -60,6 +61,12 @@ module.exports = class Book extends Sequelize.Model{
         db.Book.belongsToMany(db.Category, {
             through: 'book_category'
         });
+        db.Book.belongsToMany(db.User, {
+            through: 'wish'
+        });
+        
+        
+        db.Book.belongsTo(db.Category);
         db.Book.hasMany(db.Feed);
     }
 };

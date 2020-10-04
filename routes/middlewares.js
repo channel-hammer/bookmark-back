@@ -5,27 +5,6 @@ const path = require('path');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const fs = require('fs');
-const redis = require('redis');
-const logger = require('../logger');
-
-//get client from redis labs 
-const redisClient = redis.createClient({
-  no_ready_check: true,
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
-  pass: process.env.REDIS_PASSWORD,
-  logErrors: true,
-});
-
-// print redis errors to the console and logger
-redisClient.on('error', (err) => {
-  console.log('Error', + err);
-  logger.log('Error', err);
-});
-
-exports.loginCache = (req, res) => {
-  const {}
-};
 
 fs.readdir('uploads', (error) => {
   if(error){
