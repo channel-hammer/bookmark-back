@@ -35,15 +35,20 @@ module.exports = class Book extends Sequelize.Model{
             },
             isbn: {
                 type: Sequelize.STRING(45),
+                primaryKey: true,
                 allowNull: false,
             },
+            imageLink: {
+                type: Sequelize.STRING(200),
+                allowNull: true,
+            }
         }, {
             sequelize,
-            timestamps: false,
+            timestamps: true,
             underscored: false,
             modelName: 'Book',
             tableName: 'books',
-            paranoid: false,
+            paranoid: true,
             charset: 'utf8',
             collate: 'utf8_general_ci',
         });
@@ -56,6 +61,12 @@ module.exports = class Book extends Sequelize.Model{
         db.Book.belongsToMany(db.Category, {
             through: 'book_category'
         });
+        db.Book.belongsToMany(db.User, {
+            through: 'wish'
+        });
+        
+        
+        db.Book.belongsTo(db.Category);
         db.Book.hasMany(db.Feed);
     }
 };

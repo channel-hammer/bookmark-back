@@ -6,10 +6,131 @@ const fs = require('fs');
 const { QueryTypes, Sequelize } = require('sequelize');
 
 
-const { verifyToken, apiLimiter } = require('./middlewares');
+const { verifyToken, apiLimiter, upload } = require('./middlewares');
 const { User, Book, Category, Feed, sequelize } = require('../models');
 
 const router = express.Router();
+
+router.get('/books/wish/:book_id', verifyToken, async(req, res) => {
+  const book_id = Number(req.params.book_id);
+  try {
+    const books = await sequelize.query(
+      "SELECT * FROM books l join wish r on l.id = r.BookId",
+      {
+        replacements: { user_id: user_id },
+        type: QueryTypes.SELECT,
+      }
+    );
+    if(!books){
+      return res.json({
+        code: 204,
+        message: "search response is null"
+      });
+    }
+
+    return res.status(200).json({
+      code: 200,
+      payload: JSON.stringify(books),
+      message: `book_id: ${book_id} wish books`,
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      code: 500,
+      message: '서버 에러',
+    });
+  }
+});
+
+router.get('/books/wish/user/:user_id', verifyToken, async(req, res) => {
+  const user_id  = Number(req.params.user_id);
+  try {
+    const books = await sequelize.query(
+      "SELECT * FROM books l JOIN wish r ON l.id = r.BookId WHERE r.UserId =:user_id",
+      {
+        replacements: { user_id: user_id },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    if(!books){
+      return res.json({
+        code: 204,
+        message: "search response is null"
+      });
+    }
+
+    return res.status(200).json({
+      code: 200,
+      payload: JSON.stringify(books),
+      message: `user_id: ${user_id} wish books`,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      code: 500,
+      message: '서버 에러',
+    });
+  }
+
+});
+
+
+
+router.post('/books/wish', verifyToken, async (req, res) => {
+  const { user_id, book_isbn, book_author, book_name, book_publisher, book_imageLink } = req.body;
+  try {
+    let book = await Book.findOne({
+      where: { isbn: book_isbn },
+    });
+    
+    if(!book){
+      book = await Book.create({
+        author: book_author,
+        name: book_name,
+        isbn: book_isbn,
+        price: 1,
+        publisher: book_publisher,
+        imageLink: book_imageLink,
+        update: "temp",
+        isbn: book_isbn,
+      });
+    }
+
+    if(wish.length == 0){
+      try {
+        await sequelize.query(
+          //INSERT INTO `wish` IF NOT EXISTS
+          "INSERT INTO `wish` (`createdAt`, `updatedAt`, `UserId`, `BookId`) VALUES (NOW(), NOW(), :user_id, :book_id)",
+          {
+            replacements: { user_id: user_id, book_id: book.id},
+            type: QueryTypes.INSERT,
+          }
+        )
+
+      } catch (error) {
+        return res.status(204).json({
+          code: 204,
+          message: '이미 찜한 책입니다.',
+        });
+      } 
+      
+    }
+    return res.status(201).json({
+      code: 201,
+      message: "add",
+      payload: JSON.stringify(book),
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      code: 500,
+      message: '서버 에러',
+    });
+  }
+});
 
 router.get('/categories/user/:user_id', verifyToken, async (req, res) => {//아이디 별 카테고리 가져오기
     const id = Number(req.params.user_id);
@@ -47,6 +168,9 @@ router.get('/categories/user/:user_id', verifyToken, async (req, res) => {//아�
 router.post('/feeds/like', verifyToken, async (req, res) => {
     const { user_id, feed_id } = req.body;
     try {
+      const post = await Feed.findOne({
+        where: { id: feed_id },
+      });
       const like = await sequelize.query(
         "SELECT * FROM `like` WHERE UserId=:user_id AND FeedId=:feed_id LIMIT 1",
         {
@@ -63,14 +187,27 @@ router.post('/feeds/like', verifyToken, async (req, res) => {
             type: QueryTypes.INSERT,
           }
         )
+        await post.update({
+          like: post.like + 1,
+        });
         return res.status(201).json({
           code: 201,
-          message: `like`,
+          message: 'like',
         });
       }
-      return res.status(304).json({
-        status: 304,
-        message: '이미 좋아요 한 게시글입니다.',
+      await sequelize.query(
+        "DELETE FROM `like` WHERE `UserId`=:user_id AND `FeedId`=:feed_id LIMIT 1",
+        {
+          replacements: { user_id: user_id, feed_id: feed_id, },
+          type: QueryTypes.DELETE,
+        }
+      )
+      await post.update({
+        like: post.like - 1,
+      });
+      return res.status(201).json({
+        status: 201,
+        message: 'dislike',
       });
       
   
@@ -81,6 +218,34 @@ router.post('/feeds/like', verifyToken, async (req, res) => {
         message: '서버 에러',
       });
     } 
+  });
+
+  router.get('/feeds/:book_id', verifyToken, async (req, res) => {
+    const book_id = Number(req.params.book_id);
+    try {
+      const feeds = await Feed.findAll({
+        where: { BookId: book_id}
+      });
+      if(!feeds){
+        return res.status(204).json({
+          code: 204,
+          message: "serach response is null",
+        });
+      }
+      
+      return res.status(201).json({
+        code: 201,
+        payload: JSON.stringify(feeds),
+        message: `feeds by book_id:${book_id}`,
+      });
+
+    } catch (error) {
+      console.error(error);
+        return res.status(500).json({
+          code: 500,
+          message: '서버 에러',
+        });
+    }
   });
 
   router.get('/feeds/:feed_id', verifyToken, async (req, res) => {//피드 정보 가져오기
@@ -146,8 +311,8 @@ router.post('/feeds/like', verifyToken, async (req, res) => {
       }
   });
 
-  router.post('/feeds', async (req, res) => {//피드 등록
-    const { user_id, feed_author, feed_contents, feed_imgUri, book_author, book_name, book_isbn, book_publisher } = req.body;
+  router.post('/feeds', verifyToken, upload.single('img'), async (req, res) => {//피드 등록
+    const { user_id, feed_author, feed_contents, feed_imgUri, book_author, book_name, book_isbn, book_publisher, book_imageLink } = req.body;
     try {
       const user = await User.findOne({
         where: { id: user_id },
@@ -169,20 +334,23 @@ router.post('/feeds/like', verifyToken, async (req, res) => {
           isbn: book_isbn,
           price: 1,
           publisher: book_publisher,
+          imageLink: book_imageLink,
           update: "temp",
         });
       }
       const feed = await Feed.create({
         author: feed_author,
         contents: feed_contents,
-        imgUri: feed_imgUri,
-        UserId: user_id
+        imgUri: req.file.location,
+        UserId: user_id,
+        like: 0,
       });    
       await user.addBook(book);
       await book.addFeed(feed);
+      
       return res.status(200).json({
         code: 200,
-        payload: JSON.stringify(feed),
+        payload: JSON.stringify(feed, book),
         message: '피드가 등록되었습니다.'
       });
   
@@ -199,18 +367,20 @@ router.post('/feeds/like', verifyToken, async (req, res) => {
   router.get('/books/user/:user_id', verifyToken, async (req, res) => {//읽은 책 목록
     const id = Number(req.params.user_id);
       try{
-        const user = await User.findOne( {
-          where: { id },
-        });
-  
-        if(!user){
+        const books = await sequelize.query(
+          "select l.`name`, l.author, l.imageLink, r.createdAt from books l join book_read r on l.id = r.BookId where r.UserId=:user_id",
+          {
+            replacements: { user_id: id},
+            type: QueryTypes.SELECT,
+          }
+        )
+        if(!books){
           return res.json({
             code: 204,
-            message: "Unregistered user"
+            message: "search response is null"
           });
-        } 
-        console.log(user);
-        books = await user.getBooks();
+        }
+  
         console.log(books);
         return res.json({
           code: 200,
@@ -242,7 +412,7 @@ router.post('/feeds/like', verifyToken, async (req, res) => {
           });
         } 
         console.log(user);
-        feeds = await user.getFeeds();
+        const feeds = await user.getFeeds();
         console.log(feeds);
         return res.json({
           code: 200,

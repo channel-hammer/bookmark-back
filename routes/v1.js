@@ -1,8 +1,10 @@
 const express = require('express');
+const fs = require('fs');
 
 const user = require('./user');
 const board = require('./board');
 
+const { Category } = require('../models') 
 const router = express.Router();
 
 router.use('/board', board);
@@ -10,25 +12,27 @@ router.use('/user', user);
 
 module.exports = router;
 
-// categories table init
+// categories table init method implemented once when the server starts for the first time
+
 // router.use( async (req, res) => {
-//   let text = fs.readFileSync('./public/category.txt', 'utf-8');
-//   text = text.split('\n');
-//   console.log(text)
-//   for (let line of text ){
-//     if(line.charAt(3) == '\t'){
-//       console.log(line);
-//       let category_id = Number(line.substring(0, 3))
-//       let category_name = line.substring(3).trim();
-//       let category = await Category.create({
-//         id: category_id,
-//         name: category_name,
-//       });    
-//     } 
-//   }
-// });
+//     let text = fs.readFileSync('./public/category.txt', 'utf-8');
+//     text = text.split('\n');
+//     console.log(text)
+//     for (let line of text ){
+//       if(line.charAt(3) == '\t'){
+//         console.log(line);
+//         let category_id = Number(line.substring(0, 3))
+//         let category_name = line.substring(3).trim();
+//         let category = await Category.create({
+//           id: category_id,
+//           name: category_name,
+//         });    
+//       } 
+//     }
+//   });
 
 
+// moved from board.js and user.js
 
 // router.get('/board/categories/user/:user_id', verifyToken, async (req, res) => {//아이디 별 카테고리 가져오기
 //     const id = Number(req.params.user_id);

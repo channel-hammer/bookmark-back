@@ -1,5 +1,33 @@
 const jwt = require('jsonwebtoken');
 const RateLimit = require('express-rate-limit');
+const AWS = require('aws-sdk');
+const path = require('path');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+const fs = require('fs');
+
+fs.readdir('uploads', (error) => {
+  if(error){
+    fs.mkdirSync('uploads');
+  }
+});
+AWS.config.update({
+  accessKeyId: process.env.S3_ACCESS_KEY_ID,
+  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+  region: 'ap-northeast-2',
+});
+exports.upload = multer({
+  storage: multerS3({
+    s3: new AWS.S3(),
+    bucket: 'bookmark',
+    key(req, file, cb) {
+      cb(null, `original/${+new Date()}${path.basename(file.originalname)}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+exports
 
 exports.isLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -54,3 +82,4 @@ exports.deprecated = (req, res) => {
     message: '새로운 버전이 나왔습니다. 새로운 버전을 사용하세요.',
   });
 };
+

@@ -33,5 +33,6 @@ module.exports = class Category extends Sequelize.Model{
         db.Category.belongsToMany(db.Book, {
             through: 'book_category',
         })
+        db.Category.hasMany(db.Book);
     }
 };
