@@ -10,5 +10,6 @@
     - Framework/flatform: Nodejs
     - Programming Language: Javascript, kotlin
     - AWS S3, Lightsail, EC2를 이용하여 이미지 업로드와 serverless node 구현.
+    - 현재 Keras 기반 Collaborative Filtering 시스템 구현 후 Flask를 이용하여 간단하게 Learning Server 작성 중에 있습니다.
 
 자세한 프로젝트 제안은 [여기](https://github.com/lkic1625/bookmark-back/tree/master/project/proposal.pdf)를 확인해주세요
