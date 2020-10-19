@@ -14,16 +14,16 @@
 
 자세한 프로젝트 제안은 [여기](https://github.com/lkic1625/bookmark-back/tree/master/project/proposal.pdf)를 확인해주세요
 
-![이미지1](projects/graphic_image.png)
+![이미지1](project/graphic_image.png)
 
-![이미지2](projects/bookmark0.PNG)
+![이미지2](project/bookmark0.PNG)
 
 로그인 탭입니다.
 
-![이미지3](projects/bookmark.PNG)
+![이미지3](project/bookmark.PNG)
 
 글 작성 탭입니다.
 
-![이미지4](projects/bookmark1.PNG)
+![이미지4](project/bookmark1.PNG)
 
 책 검색 탭입니다.
