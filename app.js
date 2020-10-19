@@ -71,7 +71,7 @@ if (process.env.NODE_ENV === 'production'){
   sessionOptions.proxy = true;
   sessionOptions.cookie.secure = true;
 }
-app.use(session(sessionOptions));
+app.use(session(sessionOptions))
 
 app.use(passport.initialize());
 app.use(passport.session());

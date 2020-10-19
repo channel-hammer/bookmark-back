@@ -27,7 +27,7 @@ exports.upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-exports
+
 
 exports.isLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -82,4 +82,6 @@ exports.deprecated = (req, res) => {
     message: '새로운 버전이 나왔습니다. 새로운 버전을 사용하세요.',
   });
 };
+
+
 

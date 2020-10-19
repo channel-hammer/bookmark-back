@@ -168,6 +168,9 @@ router.get('/categories/user/:user_id', verifyToken, async (req, res) => {//ì•„ì
 router.post('/feeds/like', verifyToken, async (req, res) => {
     const { user_id, feed_id } = req.body;
     try {
+      const user = await User.findOne({
+        where: { id: user_id },
+      })
       const post = await Feed.findOne({
         where: { id: feed_id },
       });
