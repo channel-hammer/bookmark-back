@@ -14,6 +14,8 @@
 
 자세한 프로젝트 제안은 [여기](https://github.com/lkic1625/bookmark-back/tree/master/project/proposal.pdf)를 확인해주세요
 
+안드로이드 프론트 코드는 [여기](https://github.com/lkic1625/bookmark-front)
+
 ![이미지1](project/graphic_image.png)
 
 ![이미지2](project/bookmark0.PNG)
